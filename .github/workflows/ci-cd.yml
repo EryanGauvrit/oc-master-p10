@@ -20,3 +20,17 @@ jobs:
       - name: Run frontend tests
         run: npm run test-coverage
         working-directory: front
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: mvn clean install
+        working-directory: back
+
+      - name: Run backend tests
+        run: mvn test
+        working-directory: back
