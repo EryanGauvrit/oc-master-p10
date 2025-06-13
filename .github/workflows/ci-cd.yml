@@ -20,13 +20,13 @@ jobs:
       - name: Run frontend tests
         run: npm run test-coverage
         working-directory: front
-
-      - name: Upload frontend test report
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
+      - name: Frontend Test Reporting
+        uses: phoenix-actions/test-reporting@v8
+        id: test-report
         with:
-          name: front-coverage-report
-          path: front/coverage
+          name: Jasmine Tests
+          path: 'front/coverage/junit-report.xml'                 
+          reporter: java-junit   
           
 
   backend:
