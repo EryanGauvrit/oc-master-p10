@@ -24,7 +24,7 @@ jobs:
         uses: phoenix-actions/test-reporting@v8
         id: test-report
         with:
-          name: Jasmine Tests
+          name: Frontend Test Report
           path: 'front/coverage/junit-report.xml'                 
           reporter: java-junit   
           
@@ -42,3 +42,10 @@ jobs:
       - name: Run backend tests
         run: mvn test
         working-directory: back
+
+      - name: Backend Test Reporting
+        uses: phoenix-actions/test-reporting@v8
+        with:
+          name: Backend Test Report
+          path: 'back/target/surefire-reports/*.xml'
+          reporter: java-junit
