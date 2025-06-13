@@ -1,0 +1,22 @@
+name: CI/CD Workflow
+run-name: CI/CD Workflow
+on: [push]
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      
+      - name: Install dependencies
+        run: npm install
+        working-directory: front
+
+      - name: Run frontend tests
+        run: npm run test-coverage
+        working-directory: front
