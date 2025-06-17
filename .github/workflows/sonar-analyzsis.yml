@@ -1,4 +1,5 @@
 name: "Sonar Analysis Workflow"
+run-name: Sonar Analysis Workflow
 on:
   workflow_run:
     workflows: ["CI/CD Workflow"]

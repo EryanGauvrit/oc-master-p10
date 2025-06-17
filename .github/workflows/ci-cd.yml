@@ -2,9 +2,6 @@ name: CI/CD Workflow
 run-name: CI/CD Workflow
 on: 
   push:
-    paths:
-      - 'front/**'
-      - 'back/**'
 jobs:
   frontend:
     runs-on: ubuntu-latest
