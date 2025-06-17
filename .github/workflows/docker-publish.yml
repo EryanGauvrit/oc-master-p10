@@ -6,6 +6,27 @@ on:
     types: 
       - completed
 jobs:
+  build-and-push-front:
+    name: Build & Push Frontend Docker Image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-front:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-front:latest
   build-and-push-back:
     name: Build & Push Backend Docker Image
     runs-on: ubuntu-latest

@@ -1,5 +1,5 @@
-name: CI/CD Workflow
-run-name: CI/CD Workflow
+name: Test Coverage Workflow
+run-name: Test Coverage Workflow
 on: 
   push:
 jobs:
