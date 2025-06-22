@@ -21,13 +21,13 @@ jobs:
       - name: Run frontend tests
         run: npm run test-coverage
         working-directory: front
-      - name: Frontend Test Reporting
-        uses: phoenix-actions/test-reporting@v8
-        id: test-report
+
+      - name: Frontend Test Reporting in artifact
+        uses : actions/upload-artifact@v4
+        if: success() || failure()
         with:
-          name: Frontend Test Report
-          path: 'front/coverage/junit-report.xml'                 
-          reporter: java-junit   
+          name: frontend-coverage-report
+          path: front/coverage/lcov.info
           
 
   backend:

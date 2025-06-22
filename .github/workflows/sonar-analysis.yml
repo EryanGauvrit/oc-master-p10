@@ -5,6 +5,11 @@ on:
     workflows: ["Test Coverage Workflow"]
     types: 
       - completed
+
+permissions:
+  actions: read 
+  contents: read
+  checks: write
 jobs:
   front:
     name: "Sonar Analysis Frontend"
@@ -12,7 +17,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
+      - name: Download artifact from test-coverage workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage-report
+          path: front/coverage
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:

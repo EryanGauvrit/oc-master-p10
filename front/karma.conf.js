@@ -10,7 +10,6 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
-      require('karma-junit-reporter'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
@@ -34,12 +33,7 @@ module.exports = function (config) {
         { type: 'lcov' }
       ],
     },
-    reporters: ['progress', 'kjhtml', 'junit'],
-    junitReporter: {
-      outputDir: 'coverage',
-      outputFile: 'junit-report.xml',
-      useBrowserName: false
-    },
+    reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
