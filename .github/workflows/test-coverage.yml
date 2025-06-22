@@ -2,6 +2,7 @@ name: Test Coverage Workflow
 run-name: Test Coverage Workflow
 on: 
   push:
+  pull_request: 
 jobs:
   frontend:
     runs-on: ubuntu-latest
@@ -28,25 +29,3 @@ jobs:
         with:
           name: frontend-coverage-report
           path: front/coverage/lcov.info
-          
-
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Install dependencies
-        run: mvn clean install
-        working-directory: back
-
-      - name: Run backend tests
-        run: mvn test
-        working-directory: back
-
-      - name: Backend Test Reporting
-        uses: phoenix-actions/test-reporting@v8
-        with:
-          name: Backend Test Report
-          path: 'back/target/surefire-reports/*.xml'
-          reporter: java-junit

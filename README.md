@@ -70,21 +70,22 @@ La chaîne CI/CD repose sur trois workflows distincts définis dans `.github/wor
 
 Exécution des **tests** et génération de la **couverture de code** pour le front‑end et le back‑end.
 
-| Étape                        | Objectif                                                                              | Exécuté sur   | Déclencheurs        |
-| ---------------------------- | ------------------------------------------------------------------------------------- | ------------- | ------------------- |
-| **Checkout & Cache**         | Récupérer le code et restaurer les caches Maven/NPM                                   | ubuntu-latest | `push`              |
-| **Backend · Build & Tests**  | Compiler le back‑end, lancer les tests JUnit, générer le rapport **JaCoCo**           | JDK 11        | `push`              |
-| **Frontend · Build & Tests** | Installer les dépendances, lancer les tests Jasmine, générer le rapport de couverture | Node 14       | `push`              |
-| **Publish Coverage Report**  | Archiver les rapports XML                                                             | GitHub Pages  | Après tests validés |
+| Étape                        | Objectif                                                                              | Exécuté sur   | Déclencheurs        | Commandes |
+| ---------------------------- | ------------------------------------------------------------------------------------- | ------------- | ------------------- | -------- |
+| **Checkout & Cache**         | Récupérer le code et restaurer les caches Maven/NPM                                   | ubuntu-latest | `push` `pull request`           | `- uses: actions/checkout@v4` |
+| **Frontend · Build & Tests** | Installer les dépendances, lancer les tests Jasmine, générer le rapport de couverture | Node 14       |              | `- npm install` `- npm run test-coverage` |
+| **Publish Coverage Report**  | Archiver les rapports XML                                                             | GitHub Pages  |  | `- uses : actions/upload-artifact@v4` |
 
 ### 🔹 sonar-analysis.yml
 
 Analyse statique du code via **SonarCloud** pour les deux parties (front et back).
 
-| Étape               | Objectif                                                                           | Exécuté sur      | Déclencheurs         |
-| ------------------- | ---------------------------------------------------------------------------------- | ---------------- | -------------------- |
-| **Checkout**        | Récupérer le code                                                                  | ubuntu-latest    | action tests validée |
-| **SonarCloud Scan** | Lancer `sonar-scanner` avec les chemins vers les sources et rapports de couverture | SonarScanner CLI |                      |
+| Étape               | Objectif                                                                           | Exécuté sur      | Déclencheurs         | Commandes |
+| ------------------- | ---------------------------------------------------------------------------------- | ---------------- | -------------------- | ---------- |
+| **Checkout**        | Récupérer le code                                                                  | ubuntu-latest    | action tests validée | `- uses: actions/checkout@v4` |
+| **Download artifact**| Pour la partie front-end, télécharger le rapport depuis l'archive                 | ubuntu-latest    |  | `- uses: actions/download-artifact@v4` |
+| **SonarCloud Scan** (front-end) | Lancer `sonar-scanner` avec les chemins vers les sources et rapports de couverture | SonarScanner CLI |                      | `- uses: SonarSource/sonarqube-scan-action@v5` |
+| **SonarCloud Scan** (backend-end) | Lancer les tests puis lancer `sonar-scanner` avec les chemins vers les sources et rapports de couverture | SonarScanner CLI |                      | `- run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar` |
 
 Le scan est paramétré pour reconnaître les deux modules (frontend et backend) et publier les résultats vers **SonarCloud**. La qualité du code est contrôlée via une **Quality Gate**.
 
@@ -92,14 +93,14 @@ Le scan est paramétré pour reconnaître les deux modules (frontend et backend)
 
 Build et publication des **images Docker** front‑end et back‑end sur **Docker Hub**.
 
-| Étape                       | Objectif                                                                      | Exécuté sur   | Déclencheurs                 |
-| --------------------------- | ----------------------------------------------------------------------------- | ------------- | ---------------------------- |
-| **Checkout & Setup**        | Récupérer le code, configurer Docker Buildx et les permissions de publication | ubuntu-latest | action sonar analyse validée |
-| **Login to DockerHub**      | Authentifier le workflow sur Docker Hub via secrets                           | Docker CLI    |                              |
-| **Backend · Docker Build**  | Construire l'image `bobapp-back:latest`                                       | Docker Buildx |                              |
-| **Frontend · Docker Build** | Construire l'image `bobapp-front:latest`                                      | Docker Buildx |                              |
-| **Push Backend Image**      | Pousser les images back‑end vers le registre Docker                           | Docker CLI    |                              |
-| **Push Frontend Image**     | Pousser les images front‑end vers le registre Docker                          | Docker CLI    |                              |
+| Étape                       | Objectif                                                                      | Exécuté sur   | Déclencheurs                 | Commandes |
+| --------------------------- | ----------------------------------------------------------------------------- | ------------- | ---------------------------- | ---------- |
+| **Checkout & Setup**        | Récupérer le code, configurer Docker Buildx et les permissions de publication | ubuntu-latest | action sonar analyse validée | `- uses: actions/checkout@v4` |
+| **Login to DockerHub**      | Authentifier le workflow sur Docker Hub via secrets                           | Docker CLI    |                              | `- uses: docker/login-action@v3` |
+| **Backend · Docker Build**  | Construire l'image `bobapp-back:latest`                                       | Docker Buildx |                              | `- run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-front:latest .` |
+| **Frontend · Docker Build** | Construire l'image `bobapp-front:latest`                                      | Docker Buildx |                              | `- run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-back:latest .` |
+| **Push Backend Image**      | Pousser les images back‑end vers le registre Docker                           | Docker CLI    |                              | `- run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-front:latest` |
+| **Push Frontend Image**     | Pousser les images front‑end vers le registre Docker                          | Docker CLI    |                              | `- run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-back:latest` |
 
 Chaque workflow est chaîné logiquement :
 
@@ -125,11 +126,11 @@ Ces seuils sont configurés dans la **Quality Gate** Sonar.
 
 | Mesure               | Valeur actuelle | Statut par rapport au seuil |
 | -------------------- | --------------- | --------------------------- |
-| Couverture back‑end  | **32%**         | ❌ à améliorer              |
-| Couverture front‑end | **76.92%**      | ❌ à améliorer              |
+| Couverture back‑end  | **38.8%**         | ❌ à améliorer              |
+| Couverture front‑end | **47.6%**      | ❌ à améliorer              |
 | New Blocker Issues   | **0**           | ✅ conforme                  |
-| Duplications         | 0%              | ✅ conforme                 |
-| Durée pipeline       | 3 min 22s       | ✅ conforme                  |
+| Duplications         | **0%**          | ✅ conforme                 |
+| Durée pipeline       | **3 min 22s**    | ✅ conforme                  |
 
 Les rapports détaillés sont générés et publiés dans l’onglet **Actions → Artifacts** ainsi que sur **SonarCloud**.
 
